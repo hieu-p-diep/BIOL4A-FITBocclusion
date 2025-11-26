@@ -112,7 +112,7 @@
         const jacc = inter / Math.max(1, unionSize);
         if (jacc >= 0.75) return true;
 
-        // Allow subset when one side is short ("signal" vs "the signal")
+        // Allow subset when one side is short
         if (Math.min(ta.length, tb.length) <= 2) {
           const short = ta.length <= tb.length ? ta : tb;
           const longSet = new Set(ta.length <= tb.length ? tb : ta);
@@ -120,62 +120,294 @@
         }
       }
 
-      // Character-level typo tolerance scaled by length
+      // Character-level typo tolerance
       const d = lev(na, nb);
       const L = Math.max(na.length, nb.length);
-      const thresh = Math.max(1, Math.min(4, Math.round(L * 0.22))); // ~22% typos, cap 4
+      const thresh = Math.max(1, Math.min(4, Math.round(L * 0.22)));
       return d <= thresh;
     };
 
     const matchFITB = (userInput, acceptableAnswers) =>
       acceptableAnswers.some((a) => eqLoose(a, userInput));
 
-    /**********************  QUESTIONS  **********************/
+    /**********************  QUESTIONS WITH EXPLANATIONS  **********************/
     const QUESTIONS = [
       // ---------- PAGE 2 ----------
-      { id: 1, page: 2, label: "2-1", prompt: "______", answers: ["signal", "signals"], imageSrc: "images/image2.png" },
-      { id: 2, page: 2, label: "2-2", prompt: "______", answers: ["chromatin modification", "chromatin modifications"], imageSrc: "images/image2.png" },
-      { id: 3, page: 2, label: "2-3", prompt: "______", answers: ["transcription"], imageSrc: "images/image2.png" },
-      { id: 4, page: 2, label: "2-4", prompt: "______", answers: ["mRNA degradation", "degradation of mrna"], imageSrc: "images/image2.png" },
-      { id: 5, page: 2, label: "2-5", prompt: "______", answers: ["protein degradation", "degradation of protein"], imageSrc: "images/image2.png" },
+      {
+        id: 1,
+        page: 2,
+        label: "2-1",
+        prompt: "______",
+        answers: ["signal", "signals"],
+        imageSrc: "images/image2.png",
+        exp: "An extracellular signal starts a signaling pathway that ultimately regulates gene expression inside the nucleus."
+      },
+      {
+        id: 2,
+        page: 2,
+        label: "2-2",
+        prompt: "______",
+        answers: ["chromatin modification", "chromatin modifications"],
+        imageSrc: "images/image2.png",
+        exp: "Chromatin modifications (like DNA methylation or histone acetylation) change how tightly DNA is packed and how accessible genes are."
+      },
+      {
+        id: 3,
+        page: 2,
+        label: "2-3",
+        prompt: "______",
+        answers: ["transcription"],
+        imageSrc: "images/image2.png",
+        exp: "Transcription is the process of copying information from DNA into an RNA transcript."
+      },
+      {
+        id: 4,
+        page: 2,
+        label: "2-4",
+        prompt: "______",
+        answers: ["mRNA degradation", "degradation of mrna"],
+        imageSrc: "images/image2.png",
+        exp: "mRNA degradation breaks down messenger RNA, limiting how long it can be used for translation."
+      },
+      {
+        id: 5,
+        page: 2,
+        label: "2-5",
+        prompt: "______",
+        answers: ["protein degradation", "degradation of protein"],
+        imageSrc: "images/image2.png",
+        exp: "Protein degradation removes proteins that are damaged, misfolded, or no longer needed, helping regulate their levels."
+      },
 
       // ---------- PAGE 4 ----------
-      { id: 6, page: 4, label: "4-1", prompt: "______", answers: ["dna"], imageSrc: "images/image4.png" },
-      { id: 7, page: 4, label: "4-2", prompt: "______", answers: ["chromatin"], imageSrc: "images/image4.png" },
-      { id: 8, page: 4, label: "4-3", prompt: "______", answers: ["methyl group", "methyl"], imageSrc: "images/image4.png" },
-      { id: 9, page: 4, label: "4-4", prompt: "______", answers: ["acetyl group", "acetyl"], imageSrc: "images/image4.png" },
+      {
+        id: 6,
+        page: 4,
+        label: "4-1",
+        prompt: "______",
+        answers: ["chromosome"],
+        imageSrc: "images/image4.png",
+        exp: "The most condensed form of DNA is a chromosome, which forms from tightly packed chromatin."
+      },
+      {
+        id: 7,
+        page: 4,
+        label: "4-2",
+        prompt: "______",
+        answers: ["chromatin"],
+        imageSrc: "images/image4.png",
+        exp: "Chromatin is the complex of DNA and proteins that can be compact or open, affecting gene expression."
+      },
+      {
+        id: 8,
+        page: 4,
+        label: "4-3",
+        prompt: "______",
+        answers: ["methyl group", "methyl"],
+        imageSrc: "images/image4.png",
+        exp: "Addition of methyl groups to DNA (DNA methylation) is often associated with gene silencing."
+      },
+      {
+        id: 9,
+        page: 4,
+        label: "4-4",
+        prompt: "______",
+        answers: ["acetyl group", "acetyl"],
+        imageSrc: "images/image4.png",
+        exp: "Acetyl groups added to histone tails loosen chromatin and usually increase gene expression."
+      },
 
       // ---------- PAGE 6 ----------
-      { id: 10, page: 6, label: "6-1", prompt: "______", answers: ["methylation", "dna methylation"], imageSrc: "images/image6.png" },
-      { id: 11, page: 6, label: "6-2", prompt: "______", answers: ["acetylation", "histone acetylation"], imageSrc: "images/image6.png" },
+      {
+        id: 10,
+        page: 6,
+        label: "6-1",
+        prompt: "______",
+        answers: ["methylation", "dna methylation"],
+        imageSrc: "images/image6.png",
+        exp: "DNA methylation causes nucleosomes to pack tightly so transcription factors cannot access the DNA."
+      },
+      {
+        id: 11,
+        page: 6,
+        label: "6-2",
+        prompt: "______",
+        answers: ["acetylation", "histone acetylation"],
+        imageSrc: "images/image6.png",
+        exp: "Histone acetylation loosens nucleosome packing so transcription factors can bind and genes can be expressed."
+      },
 
       // ---------- PAGE 8 ----------
-      { id: 12, page: 8, label: "8-1", prompt: "______", answers: ["tryptophan"], imageSrc: "images/image8.png" },
-      { id: 13, page: 8, label: "8-2", prompt: "______", answers: ["blocked", "inhibited"], imageSrc: "images/image8.png" },
-      { id: 14, page: 8, label: "8-3", prompt: "______", answers: ["tryptophan"], imageSrc: "images/image8.png" },
-      { id: 15, page: 8, label: "8-4", prompt: "______", answers: ["absence"], imageSrc: "images/image8.png" },
-      { id: 16, page: 8, label: "8-5", prompt: "______", answers: ["repressor"], imageSrc: "images/image8.png" },
+      {
+        id: 12,
+        page: 8,
+        label: "8-1",
+        prompt: "______",
+        answers: ["tryptophan"],
+        imageSrc: "images/image8.png",
+        exp: "Tryptophan acts as a corepressor that binds the trp repressor so it can shut off the operon."
+      },
+      {
+        id: 13,
+        page: 8,
+        label: "8-2",
+        prompt: "______",
+        answers: ["blocked", "inhibited"],
+        imageSrc: "images/image8.png",
+        exp: "When the repressor is bound, transcription of the trp operon is blocked or inhibited."
+      },
+      {
+        id: 14,
+        page: 8,
+        label: "8-3",
+        prompt: "______",
+        answers: ["tryptophan"],
+        imageSrc: "images/image8.png",
+        exp: "High tryptophan levels activate the repressor so the cell stops making more tryptophan."
+      },
+      {
+        id: 15,
+        page: 8,
+        label: "8-4",
+        prompt: "______",
+        answers: ["absence"],
+        imageSrc: "images/image8.png",
+        exp: "In the absence of tryptophan, the repressor cannot bind DNA and transcription proceeds."
+      },
+      {
+        id: 16,
+        page: 8,
+        label: "8-5",
+        prompt: "______",
+        answers: ["repressor"],
+        imageSrc: "images/image8.png",
+        exp: "The trp repressor protein binds the operator to turn off transcription when activated by tryptophan."
+      },
 
       // ---------- PAGE 12 ----------
-      { id: 17, page: 12, label: "12-1", prompt: "______", answers: ["camp"], imageSrc: "images/image12.png" },
-      { id: 18, page: 12, label: "12-2", prompt: "______", answers: ["low", "low rate"], imageSrc: "images/image12.png" },
-      { id: 19, page: 12, label: "12-3", prompt: "______", answers: ["transcription"], imageSrc: "images/image12.png" },
+      {
+        id: 17,
+        page: 12,
+        label: "12-1",
+        prompt: "______",
+        answers: ["camp"],
+        imageSrc: "images/image12.png",
+        exp: "cAMP levels rise when glucose is low and this allows CAP to bind DNA and stimulate transcription."
+      },
+      {
+        id: 18,
+        page: 12,
+        label: "12-2",
+        prompt: "______",
+        answers: ["low", "low rate"],
+        imageSrc: "images/image12.png",
+        exp: "Without CAP–cAMP bound, RNA polymerase has only a low rate of transcription at the lac promoter."
+      },
+      {
+        id: 19,
+        page: 12,
+        label: "12-3",
+        prompt: "______",
+        answers: ["transcription"],
+        imageSrc: "images/image12.png",
+        exp: "CAP–cAMP binding increases the rate of transcription of the lac operon genes."
+      },
 
       // ---------- PAGE 14 ----------
-      { id: 20, page: 14, label: "14-1", prompt: "______", answers: ["enhancer"], imageSrc: "images/image14.png" },
-      { id: 21, page: 14, label: "14-2", prompt: "______", answers: ["promoter"], imageSrc: "images/image14.png" },
-      { id: 22, page: 14, label: "14-3", prompt: "______", answers: ["mediator proteins", "mediator"], imageSrc: "images/image14.png" },
-      { id: 23, page: 14, label: "14-4", prompt: "______", answers: ["rna synthesis"], imageSrc: "images/image14.png" },
+      {
+        id: 20,
+        page: 14,
+        label: "14-1",
+        prompt: "______",
+        answers: ["enhancer"],
+        imageSrc: "images/image14.png",
+        exp: "Enhancers are DNA elements where activator proteins bind to boost transcription from a distant promoter."
+      },
+      {
+        id: 21,
+        page: 14,
+        label: "14-2",
+        prompt: "______",
+        answers: ["promoter"],
+        imageSrc: "images/image14.png",
+        exp: "The promoter is the DNA region where the transcription machinery assembles to start RNA synthesis."
+      },
+      {
+        id: 22,
+        page: 14,
+        label: "14-3",
+        prompt: "______",
+        answers: ["mediator proteins", "mediator"],
+        imageSrc: "images/image14.png",
+        exp: "Mediator proteins form a complex that links activators at the enhancer to RNA polymerase II at the promoter."
+      },
+      {
+        id: 23,
+        page: 14,
+        label: "14-4",
+        prompt: "______",
+        answers: ["rna synthesis"],
+        imageSrc: "images/image14.png",
+        exp: "RNA synthesis is the actual production of an RNA transcript by RNA polymerase II."
+      },
 
       // ---------- PAGE 16 ----------
-      { id: 24, page: 16, label: "16-1", prompt: "______", answers: ["albumin activators"], imageSrc: "images/image16.png" },
-      { id: 25, page: 16, label: "16-2", prompt: "______", answers: ["albumin gene"], imageSrc: "images/image16.png" },
-      { id: 26, page: 16, label: "16-3", prompt: "______", answers: ["off"], imageSrc: "images/image16.png" },
+      {
+        id: 24,
+        page: 16,
+        label: "16-1",
+        prompt: "______",
+        answers: ["albumin activators"],
+        imageSrc: "images/image16.png",
+        exp: "In liver cells, albumin-specific activators are present and turn on the albumin gene."
+      },
+      {
+        id: 25,
+        page: 16,
+        label: "16-2",
+        prompt: "______",
+        answers: ["albumin gene"],
+        imageSrc: "images/image16.png",
+        exp: "The albumin gene encodes a liver-specific protein that is expressed only in liver cells."
+      },
+      {
+        id: 26,
+        page: 16,
+        label: "16-3",
+        prompt: "______",
+        answers: ["off"],
+        imageSrc: "images/image16.png",
+        exp: "In liver cells the crystallin gene is kept OFF because its activators are not present."
+      },
 
       // ---------- PAGE 18 ----------
-      { id: 27, page: 18, label: "18-1", prompt: "______", answers: ["crystallin activators"], imageSrc: "images/image18.png" },
-      { id: 28, page: 18, label: "18-2", prompt: "______", answers: ["crystallin gene"], imageSrc: "images/image18.png" },
-      { id: 29, page: 18, label: "18-3", prompt: "______", answers: ["off"], imageSrc: "images/image18.png" },
+      {
+        id: 27,
+        page: 18,
+        label: "18-1",
+        prompt: "______",
+        answers: ["crystallin activators"],
+        imageSrc: "images/image18.png",
+        exp: "In lens cells, crystallin-specific activators are present and drive expression of the crystallin gene."
+      },
+      {
+        id: 28,
+        page: 18,
+        label: "18-2",
+        prompt: "______",
+        answers: ["crystallin gene"],
+        imageSrc: "images/image18.png",
+        exp: "The crystallin gene encodes a lens-specific protein that is expressed in lens cells but not in liver cells."
+      },
+      {
+        id: 29,
+        page: 18,
+        label: "18-3",
+        prompt: "______",
+        answers: ["off"],
+        imageSrc: "images/image18.png",
+        exp: "In lens cells the albumin gene stays OFF because the liver-specific activators are absent."
+      },
     ];
 
     /**********************  QUIZ COMPONENT  **********************/
@@ -188,10 +420,11 @@
         }, {})
       );
       const [results, setResults] = React.useState({});
+      const [submitted, setSubmitted] = React.useState({});
 
       const currentQuestion = QUESTIONS[currentIndex];
 
-      // Page-based info
+      // Per-figure item index (for the salmon box)
       const pageQuestions = React.useMemo(
         () => QUESTIONS.filter((q) => q.page === currentQuestion.page),
         [currentQuestion.page]
@@ -200,8 +433,9 @@
         pageQuestions.findIndex((q) => q.id === currentQuestion.id) + 1;
 
       const handleChange = (id, value) => {
+        // Allow editing only before submission
+        if (submitted[id]) return;
         setResponses((prev) => ({ ...prev, [id]: value }));
-        // Clear correctness flag while editing
         setResults((prev) => {
           const clone = { ...prev };
           delete clone[id];
@@ -211,9 +445,13 @@
 
       const handleCheckCurrent = () => {
         const q = currentQuestion;
+        if (submitted[q.id]) return; // prevent resubmission
+
         const userAnswer = responses[q.id] || "";
         const isCorrect = matchFITB(userAnswer, q.answers);
+
         setResults((prev) => ({ ...prev, [q.id]: isCorrect }));
+        setSubmitted((prev) => ({ ...prev, [q.id]: true }));
       };
 
       const goNext = () => {
@@ -245,15 +483,23 @@
       const percent =
         total === 0 ? 0 : Math.round((correctCount / total) * 100);
 
+      // Completion bar: how many questions have been answered at all
+      const completedCount = QUESTIONS.reduce(
+        (c, q) => (submitted[q.id] ? c + 1 : c),
+        0
+      );
+      const completedPercent =
+        total === 0 ? 0 : Math.round((completedCount / total) * 100);
+
       return (
         <div className="max-w-3xl w-full bg-white shadow-lg rounded-xl p-6 md:p-8 space-y-6">
           <h1 className="text-2xl md:text-3xl font-bold text-center text-slate-800 mb-2">
             Image Occlusion – FITB Quiz
           </h1>
 
-          {/* Page + item info */}
+          {/* Module label + global question index */}
           <p className="text-xs md:text-sm text-slate-600 text-center mb-2">
-            Page {currentQuestion.page} • Item {pageIndex} of {pageQuestions.length}
+            Lecture 16 Chapter 16 • Question {currentIndex + 1} of {QUESTIONS.length}
           </p>
 
           {/* Image above question */}
@@ -285,6 +531,7 @@
               onChange={(e) =>
                 handleChange(currentQuestion.id, e.target.value)
               }
+              disabled={submitted[currentQuestion.id]}
               className={`mt-2 w-full rounded-md border px-3 py-2 text-sm md:text-base bg-white ${
                 isCorrect
                   ? "border-emerald-500 ring-1 ring-emerald-300"
@@ -299,21 +546,41 @@
               results,
               currentQuestion.id
             ) && (
-              <div className="text-xs md:text-sm mt-1">
+              <div className="text-xs md:text-sm mt-1 space-y-1">
                 {isCorrect ? (
-                  <span className="text-emerald-600 font-semibold">
+                  <div className="text-emerald-600 font-semibold">
                     ✔ Correct
-                  </span>
+                  </div>
                 ) : (
-                  <span className="text-rose-600">
+                  <div className="text-rose-600">
                     ✘ Incorrect. One acceptable answer:{" "}
                     <span className="font-semibold">
                       {currentQuestion.answers[0]}
                     </span>
-                  </span>
+                  </div>
                 )}
+                <div className="text-slate-700">
+                  <span className="font-semibold">Explanation: </span>
+                  {currentQuestion.exp}
+                </div>
               </div>
             )}
+          </div>
+
+          {/* Completion bar */}
+          <div className="mt-2">
+            <div className="flex justify-between text-xs md:text-sm text-slate-600 mb-1">
+              <span>Completion</span>
+              <span>
+                {completedCount} / {total} ({completedPercent}%)
+              </span>
+            </div>
+            <div className="w-full h-2 rounded-full bg-slate-200 overflow-hidden">
+              <div
+                className="h-full bg-indigo-500 transition-all"
+                style={{ width: `${completedPercent}%` }}
+              ></div>
+            </div>
           </div>
 
           {/* Controls + score */}
@@ -333,9 +600,13 @@
               </button>
               <button
                 onClick={goNext}
-                disabled={currentIndex === QUESTIONS.length - 1}
+                disabled={
+                  currentIndex === QUESTIONS.length - 1 ||
+                  !submitted[currentQuestion.id]
+                }
                 className={`px-4 py-2 rounded-md text-sm font-semibold shadow-sm transition ${
-                  currentIndex === QUESTIONS.length - 1
+                  currentIndex === QUESTIONS.length - 1 ||
+                  !submitted[currentQuestion.id]
                     ? "bg-slate-300 text-slate-600 cursor-not-allowed"
                     : "bg-slate-200 text-slate-800 hover:bg-slate-300"
                 }`}
@@ -347,11 +618,11 @@
             {/* Check Answer */}
             <button
               onClick={handleCheckCurrent}
-              disabled={!answerFilled}
+              disabled={!answerFilled || submitted[currentQuestion.id]}
               className={`px-5 py-2.5 rounded-md text-sm font-semibold text-white shadow-sm transition ${
-                answerFilled
-                  ? "bg-indigo-600 hover:bg-indigo-700"
-                  : "bg-slate-400 cursor-not-allowed"
+                !answerFilled || submitted[currentQuestion.id]
+                  ? "bg-slate-400 cursor-not-allowed"
+                  : "bg-indigo-600 hover:bg-indigo-700"
               }`}
             >
               Check Answer
