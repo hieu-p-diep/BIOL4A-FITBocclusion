@@ -1,120 +1,373 @@
-<!-- UPDATED FULL FILE WITH ALL 5 REQUESTS IMPLEMENTED -->
-<!-- ✓ FITB questions auto-generated from even pages of image occlusion PDF -->
-<!-- ✓ IDs auto-renumbered -->
-<!-- ✓ Grouped by page/module -->
-<!-- ✓ Page progress indicator added -->
-<!-- ✓ GitHub-ready (expects /images folder) -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Image Occlusion FITB Quiz</title>
+  <title>Image Occlusion – FITB Quiz</title>
 
+  <!-- React + Babel -->
   <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+    }
+    input[type="text"] {
+      outline: none;
+    }
+  </style>
 </head>
 
 <body class="bg-slate-100 min-h-screen flex items-center justify-center">
-<div id="root"></div>
+  <div id="root"></div>
 
-<script type="text/babel">
+  <script type="text/babel">
+    /**********************  LENIENT MATCH HELPERS  **********************/
+    const STOP = new Set(["a","an","the","of","to","and","for","in","on","at","is"]);
 
-/* ================= LENIENT MATCHING (UNCHANGED) ================= */
-const STOP = new Set(["a","an","the","of","to","and","for","in","on","at","is"]);
-const norm = s => String(s||"").toLowerCase().replace(/[^a-z0-9\s]/g," ").replace(/\s+/g," ").trim();
-const eqLoose = (a,b)=>norm(a)===norm(b);
-const matchFITB = (u,arr)=>arr.some(a=>eqLoose(a,u));
+    const IRREG = new Map([
+      ["children","child"],["mice","mouse"],["men","man"],["women","woman"],
+      ["teeth","tooth"],["feet","foot"],["geese","goose"],
+      ["nuclei","nucleus"],["bacteria","bacterium"],["data","datum"],
+      ["media","medium"],["criteria","criterion"],["indices","index"],
+      ["matrices","matrix"],["codices","codex"],["lives","life"],["leaves","leaf"]
+    ]);
 
-/* ================= QUESTIONS (AUTO-GENERATED) ================= */
-const QUESTIONS = [
+    const norm = (s) =>
+      String(s == null ? "" : s)
+        .toLowerCase()
+        .normalize("NFKD")
+        .replace(/[\u0300-\u036f]/g, "")          // strip accents
+        .replace(/[‐-‒–—―]/g, "-")               // unify dashes
+        .replace(/β/g, "beta")
+        .replace(/α/g, "alpha")
+        .replace(/γ/g, "gamma")
+        .replace(/μ/g, "micro")
+        .replace(/ß/g, "ss")
+        .replace(/[^a-z0-9\s\-+\/.%]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
 
-// ---------- PAGE 2 ----------
-{ id:1, page:2, label:"2-1", prompt:"______", answers:["signal"], imageSrc:"images/image2.png" },
-{ id:2, page:2, label:"2-2", prompt:"______", answers:["chromatin modification"], imageSrc:"images/image2.png" },
-{ id:3, page:2, label:"2-3", prompt:"______", answers:["transcription"], imageSrc:"images/image2.png" },
-{ id:4, page:2, label:"2-4", prompt:"______", answers:["mRNA degradation"], imageSrc:"images/image2.png" },
-{ id:5, page:2, label:"2-5", prompt:"______", answers:["protein degradation"], imageSrc:"images/image2.png" },
+    const singularize = (w) => {
+      if (IRREG.has(w)) return IRREG.get(w);
+      if (w.endsWith("ies") && w.length > 3) return w.slice(0, -3) + "y";
+      if (/(ches|shes|xes|zes)$/.test(w)) return w.slice(0, -2);
+      if (/ves$/.test(w))
+        return w.slice(0, -3) + (w.endsWith("ves") ? (w.slice(-4, -3) === "i" ? "fe" : "f") : "f");
+      if (w.endsWith("es") &&
+          !w.endsWith("ses") &&
+          !/(ches|shes|xes|zes)$/.test(w)) return w.slice(0, -2);
+      if (w.endsWith("s") && !w.endsWith("ss")) return w.slice(0, -1);
+      return w;
+    };
 
-// ---------- PAGE 4 ----------
-{ id:6, page:4, label:"4-1", prompt:"______", answers:["DNA"], imageSrc:"images/image4.png" },
-{ id:7, page:4, label:"4-2", prompt:"______", answers:["chromatin"], imageSrc:"images/image4.png" },
-{ id:8, page:4, label:"4-3", prompt:"______", answers:["methyl group"], imageSrc:"images/image4.png" },
-{ id:9, page:4, label:"4-4", prompt:"______", answers:["acetyl group"], imageSrc:"images/image4.png" },
+    const baseForm = (s) =>
+      norm(s)
+        .replace(/[-_]/g, " ")
+        .split(" ")
+        .filter(Boolean)
+        .map((w) => singularize(w))
+        .join(" ");
 
-// ---------- PAGE 6 ----------
-{ id:10, page:6, label:"6-1", prompt:"______", answers:["methylation"], imageSrc:"images/image6.png" },
-{ id:11, page:6, label:"6-2", prompt:"______", answers:["acetylation"], imageSrc:"images/image6.png" },
+    const tokens = (s) =>
+      baseForm(s)
+        .split(" ")
+        .filter((w) => w && !STOP.has(w));
 
-// ---------- PAGE 8 ----------
-{ id:12, page:8, label:"8-1", prompt:"______", answers:["tryptophan"], imageSrc:"images/image8.png" },
-{ id:13, page:8, label:"8-2", prompt:"______", answers:["blocked"], imageSrc:"images/image8.png" },
-{ id:14, page:8, label:"8-3", prompt:"______", answers:["tryptophan"], imageSrc:"images/image8.png" },
-{ id:15, page:8, label:"8-4", prompt:"______", answers:["absence"], imageSrc:"images/image8.png" },
-{ id:16, page:8, label:"8-5", prompt:"______", answers:["repressor"], imageSrc:"images/image8.png" },
+    // Levenshtein distance
+    const lev = (a, b) => {
+      a = baseForm(a); b = baseForm(b);
+      if (a === b) return 0;
+      const m = a.length, n = b.length;
+      if (!m) return n; if (!n) return m;
+      const v0 = new Array(n + 1), v1 = new Array(n + 1);
+      for (let i = 0; i <= n; i++) v0[i] = i;
+      for (let i = 0; i < m; i++) {
+        v1[0] = i + 1;
+        for (let j = 0; j < n; j++) {
+          const cost = a[i] === b[j] ? 0 : 1;
+          v1[j + 1] = Math.min(v1[j] + 1, v0[j + 1] + 1, v0[j] + cost);
+        }
+        for (let j = 0; j <= n; j++) v0[j] = v1[j];
+      }
+      return v0[n];
+    };
 
-// ---------- PAGE 12 ----------
-{ id:17, page:12, label:"12-1", prompt:"______", answers:["cAMP"], imageSrc:"images/image12.png" },
-{ id:18, page:12, label:"12-2", prompt:"______", answers:["low"], imageSrc:"images/image12.png" },
-{ id:19, page:12, label:"12-3", prompt:"______", answers:["transcription"], imageSrc:"images/image12.png" },
+    const eqLoose = (a, b) => {
+      const na = norm(a), nb = norm(b);
+      if (na === nb) return true;
 
-// ---------- PAGE 14 ----------
-{ id:20, page:14, label:"14-1", prompt:"______", answers:["enhancer"], imageSrc:"images/image14.png" },
-{ id:21, page:14, label:"14-2", prompt:"______", answers:["promoter"], imageSrc:"images/image14.png" },
-{ id:22, page:14, label:"14-3", prompt:"______", answers:["mediator"], imageSrc:"images/image14.png" },
-{ id:23, page:14, label:"14-4", prompt:"______", answers:["RNA synthesis"], imageSrc:"images/image14.png" },
+      const ta = tokens(na), tb = tokens(nb);
+      if (ta.length && tb.length) {
+        // Jaccard similarity on tokens
+        const setB = new Set(tb);
+        let inter = 0;
+        for (let t of ta) if (setB.has(t)) inter++;
+        const unionSize = new Set([...ta, ...tb]).size;
+        const jacc = inter / Math.max(1, unionSize);
+        if (jacc >= 0.75) return true;
 
-// ---------- PAGE 16 ----------
-{ id:24, page:16, label:"16-1", prompt:"______", answers:["albumin activators"], imageSrc:"images/image16.png" },
-{ id:25, page:16, label:"16-2", prompt:"______", answers:["albumin gene"], imageSrc:"images/image16.png" },
-{ id:26, page:16, label:"16-3", prompt:"______", answers:["off"], imageSrc:"images/image16.png" },
+        // Allow subset when one side is short ("signal" vs "the signal")
+        if (Math.min(ta.length, tb.length) <= 2) {
+          const short = ta.length <= tb.length ? ta : tb;
+          const longSet = new Set(ta.length <= tb.length ? tb : ta);
+          if (short.every((w) => longSet.has(w))) return true;
+        }
+      }
 
-// ---------- PAGE 18 ----------
-{ id:27, page:18, label:"18-1", prompt:"______", answers:["crystallin activators"], imageSrc:"images/image18.png" },
-{ id:28, page:18, label:"18-2", prompt:"______", answers:["crystallin gene"], imageSrc:"images/image18.png" },
-{ id:29, page:18, label:"18-3", prompt:"______", answers:["off"], imageSrc:"images/image18.png" },
-];
+      // Character-level typo tolerance scaled by length
+      const d = lev(na, nb);
+      const L = Math.max(na.length, nb.length);
+      const thresh = Math.max(1, Math.min(4, Math.round(L * 0.22))); // ~22% typos, cap 4
+      return d <= thresh;
+    };
 
-/* ================= QUIZ ================= */
-function FitbQuiz(){
-  const [i,setI]=React.useState(0);
-  const [ans,setA]=React.useState({});
-  const [res,setR]=React.useState({});
+    const matchFITB = (userInput, acceptableAnswers) =>
+      acceptableAnswers.some((a) => eqLoose(a, userInput));
 
-  const q=QUESTIONS[i];
-  const pageQs=QUESTIONS.filter(x=>x.page===q.page);
-  const pageIndex=pageQs.findIndex(x=>x.id===q.id)+1;
+    /**********************  QUESTIONS  **********************/
+    const QUESTIONS = [
+      // ---------- PAGE 2 ----------
+      { id: 1, page: 2, label: "2-1", prompt: "______", answers: ["signal", "signals"], imageSrc: "images/image2.png" },
+      { id: 2, page: 2, label: "2-2", prompt: "______", answers: ["chromatin modification", "chromatin modifications"], imageSrc: "images/image2.png" },
+      { id: 3, page: 2, label: "2-3", prompt: "______", answers: ["transcription"], imageSrc: "images/image2.png" },
+      { id: 4, page: 2, label: "2-4", prompt: "______", answers: ["mRNA degradation", "degradation of mrna"], imageSrc: "images/image2.png" },
+      { id: 5, page: 2, label: "2-5", prompt: "______", answers: ["protein degradation", "degradation of protein"], imageSrc: "images/image2.png" },
 
-  const check=()=>setR(r=>({...r,[q.id]:matchFITB(ans[q.id],q.answers)}));
+      // ---------- PAGE 4 ----------
+      { id: 6, page: 4, label: "4-1", prompt: "______", answers: ["dna"], imageSrc: "images/image4.png" },
+      { id: 7, page: 4, label: "4-2", prompt: "______", answers: ["chromatin"], imageSrc: "images/image4.png" },
+      { id: 8, page: 4, label: "4-3", prompt: "______", answers: ["methyl group", "methyl"], imageSrc: "images/image4.png" },
+      { id: 9, page: 4, label: "4-4", prompt: "______", answers: ["acetyl group", "acetyl"], imageSrc: "images/image4.png" },
 
-  return(
-  <div className="max-w-3xl w-full bg-white p-6 rounded-xl shadow">
-    <h1 className="text-2xl font-bold text-center">Image Occlusion FITB</h1>
-    <p className="text-center text-sm text-slate-500">Page {q.page} • Item {pageIndex} of {pageQs.length}</p>
+      // ---------- PAGE 6 ----------
+      { id: 10, page: 6, label: "6-1", prompt: "______", answers: ["methylation", "dna methylation"], imageSrc: "images/image6.png" },
+      { id: 11, page: 6, label: "6-2", prompt: "______", answers: ["acetylation", "histone acetylation"], imageSrc: "images/image6.png" },
 
-    <img src={q.imageSrc} className="mx-auto my-4 max-h-[420px] border rounded" />
+      // ---------- PAGE 8 ----------
+      { id: 12, page: 8, label: "8-1", prompt: "______", answers: ["tryptophan"], imageSrc: "images/image8.png" },
+      { id: 13, page: 8, label: "8-2", prompt: "______", answers: ["blocked", "inhibited"], imageSrc: "images/image8.png" },
+      { id: 14, page: 8, label: "8-3", prompt: "______", answers: ["tryptophan"], imageSrc: "images/image8.png" },
+      { id: 15, page: 8, label: "8-4", prompt: "______", answers: ["absence"], imageSrc: "images/image8.png" },
+      { id: 16, page: 8, label: "8-5", prompt: "______", answers: ["repressor"], imageSrc: "images/image8.png" },
 
-    <p className="text-lg">{q.prompt}</p>
-    <input className="w-full border p-2 rounded" value={ans[q.id]||""}
-      onChange={e=>setA(a=>({...a,[q.id]:e.target.value}))} />
+      // ---------- PAGE 12 ----------
+      { id: 17, page: 12, label: "12-1", prompt: "______", answers: ["camp"], imageSrc: "images/image12.png" },
+      { id: 18, page: 12, label: "12-2", prompt: "______", answers: ["low", "low rate"], imageSrc: "images/image12.png" },
+      { id: 19, page: 12, label: "12-3", prompt: "______", answers: ["transcription"], imageSrc: "images/image12.png" },
 
-    {res[q.id]!==undefined && (
-      <p className={res[q.id]?"text-green-600":"text-red-600"}>
-        {res[q.id]?"✓ Correct":"✗ Incorrect"}
-      </p>
-    )}
+      // ---------- PAGE 14 ----------
+      { id: 20, page: 14, label: "14-1", prompt: "______", answers: ["enhancer"], imageSrc: "images/image14.png" },
+      { id: 21, page: 14, label: "14-2", prompt: "______", answers: ["promoter"], imageSrc: "images/image14.png" },
+      { id: 22, page: 14, label: "14-3", prompt: "______", answers: ["mediator proteins", "mediator"], imageSrc: "images/image14.png" },
+      { id: 23, page: 14, label: "14-4", prompt: "______", answers: ["rna synthesis"], imageSrc: "images/image14.png" },
 
-    <div className="flex justify-between mt-4">
-      <button disabled={i===0} onClick={()=>setI(i-1)}>Prev</button>
-      <button onClick={check}>Check</button>
-      <button disabled={i===QUESTIONS.length-1} onClick={()=>setI(i+1)}>Next</button>
-    </div>
-  </div>);
-}
+      // ---------- PAGE 16 ----------
+      { id: 24, page: 16, label: "16-1", prompt: "______", answers: ["albumin activators"], imageSrc: "images/image16.png" },
+      { id: 25, page: 16, label: "16-2", prompt: "______", answers: ["albumin gene"], imageSrc: "images/image16.png" },
+      { id: 26, page: 16, label: "16-3", prompt: "______", answers: ["off"], imageSrc: "images/image16.png" },
 
-ReactDOM.createRoot(document.getElementById('root')).render(<FitbQuiz/>);
-</script>
+      // ---------- PAGE 18 ----------
+      { id: 27, page: 18, label: "18-1", prompt: "______", answers: ["crystallin activators"], imageSrc: "images/image18.png" },
+      { id: 28, page: 18, label: "18-2", prompt: "______", answers: ["crystallin gene"], imageSrc: "images/image18.png" },
+      { id: 29, page: 18, label: "18-3", prompt: "______", answers: ["off"], imageSrc: "images/image18.png" },
+    ];
+
+    /**********************  QUIZ COMPONENT  **********************/
+    function ImageOcclusionFitbQuiz() {
+      const [currentIndex, setCurrentIndex] = React.useState(0);
+      const [responses, setResponses] = React.useState(() =>
+        QUESTIONS.reduce((acc, q) => {
+          acc[q.id] = "";
+          return acc;
+        }, {})
+      );
+      const [results, setResults] = React.useState({});
+
+      const currentQuestion = QUESTIONS[currentIndex];
+
+      // Page-based info
+      const pageQuestions = React.useMemo(
+        () => QUESTIONS.filter((q) => q.page === currentQuestion.page),
+        [currentQuestion.page]
+      );
+      const pageIndex =
+        pageQuestions.findIndex((q) => q.id === currentQuestion.id) + 1;
+
+      const handleChange = (id, value) => {
+        setResponses((prev) => ({ ...prev, [id]: value }));
+        // Clear correctness flag while editing
+        setResults((prev) => {
+          const clone = { ...prev };
+          delete clone[id];
+          return clone;
+        });
+      };
+
+      const handleCheckCurrent = () => {
+        const q = currentQuestion;
+        const userAnswer = responses[q.id] || "";
+        const isCorrect = matchFITB(userAnswer, q.answers);
+        setResults((prev) => ({ ...prev, [q.id]: isCorrect }));
+      };
+
+      const goNext = () => {
+        if (currentIndex < QUESTIONS.length - 1) {
+          setCurrentIndex((i) => i + 1);
+        }
+      };
+
+      const goPrev = () => {
+        if (currentIndex > 0) {
+          setCurrentIndex((i) => i - 1);
+        }
+      };
+
+      const answerFilled =
+        (responses[currentQuestion.id] || "").trim().length > 0;
+
+      const isCorrect = results[currentQuestion.id];
+      const isIncorrect =
+        Object.prototype.hasOwnProperty.call(results, currentQuestion.id) &&
+        !isCorrect;
+
+      // Score
+      const correctCount = QUESTIONS.reduce(
+        (count, q) => (results[q.id] ? count + 1 : count),
+        0
+      );
+      const total = QUESTIONS.length;
+      const percent =
+        total === 0 ? 0 : Math.round((correctCount / total) * 100);
+
+      return (
+        <div className="max-w-3xl w-full bg-white shadow-lg rounded-xl p-6 md:p-8 space-y-6">
+          <h1 className="text-2xl md:text-3xl font-bold text-center text-slate-800 mb-2">
+            Image Occlusion – FITB Quiz
+          </h1>
+
+          {/* Page + item info */}
+          <p className="text-xs md:text-sm text-slate-600 text-center mb-2">
+            Page {currentQuestion.page} • Item {pageIndex} of {pageQuestions.length}
+          </p>
+
+          {/* Image above question */}
+          <div className="w-full flex justify-center mb-2">
+            <img
+              src={currentQuestion.imageSrc}
+              alt={`Occluded figure for label ${currentQuestion.label}`}
+              className="max-h-[420px] w-auto border rounded-lg shadow-sm"
+            />
+          </div>
+
+          {/* Question card */}
+          <div className="border rounded-lg p-4 bg-slate-50 flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <span
+                className="inline-flex items-center justify-center px-3 py-1 text-black text-sm font-semibold shadow-sm"
+                style={{ backgroundColor: "#ff8a80", borderRadius: "3px" }}
+              >
+                {pageIndex}
+              </span>
+              <span className="text-sm text-slate-800 font-medium">
+                Identify the item in the figure.
+              </span>
+            </div>
+
+            <input
+              type="text"
+              value={responses[currentQuestion.id] || ""}
+              onChange={(e) =>
+                handleChange(currentQuestion.id, e.target.value)
+              }
+              className={`mt-2 w-full rounded-md border px-3 py-2 text-sm md:text-base bg-white ${
+                isCorrect
+                  ? "border-emerald-500 ring-1 ring-emerald-300"
+                  : isIncorrect
+                  ? "border-rose-500 ring-1 ring-rose-300"
+                  : "border-slate-300"
+              }`}
+              placeholder="Type your answer here"
+            />
+
+            {Object.prototype.hasOwnProperty.call(
+              results,
+              currentQuestion.id
+            ) && (
+              <div className="text-xs md:text-sm mt-1">
+                {isCorrect ? (
+                  <span className="text-emerald-600 font-semibold">
+                    ✔ Correct
+                  </span>
+                ) : (
+                  <span className="text-rose-600">
+                    ✘ Incorrect. One acceptable answer:{" "}
+                    <span className="font-semibold">
+                      {currentQuestion.answers[0]}
+                    </span>
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Controls + score */}
+          <div className="flex flex-col md:flex-row items-center justify-between gap-3 mt-4">
+            {/* Prev / Next */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={goPrev}
+                disabled={currentIndex === 0}
+                className={`px-4 py-2 rounded-md text-sm font-semibold shadow-sm transition ${
+                  currentIndex === 0
+                    ? "bg-slate-300 text-slate-600 cursor-not-allowed"
+                    : "bg-slate-200 text-slate-800 hover:bg-slate-300"
+                }`}
+              >
+                Previous
+              </button>
+              <button
+                onClick={goNext}
+                disabled={currentIndex === QUESTIONS.length - 1}
+                className={`px-4 py-2 rounded-md text-sm font-semibold shadow-sm transition ${
+                  currentIndex === QUESTIONS.length - 1
+                    ? "bg-slate-300 text-slate-600 cursor-not-allowed"
+                    : "bg-slate-200 text-slate-800 hover:bg-slate-300"
+                }`}
+              >
+                Next
+              </button>
+            </div>
+
+            {/* Check Answer */}
+            <button
+              onClick={handleCheckCurrent}
+              disabled={!answerFilled}
+              className={`px-5 py-2.5 rounded-md text-sm font-semibold text-white shadow-sm transition ${
+                answerFilled
+                  ? "bg-indigo-600 hover:bg-indigo-700"
+                  : "bg-slate-400 cursor-not-allowed"
+              }`}
+            >
+              Check Answer
+            </button>
+
+            {/* Score */}
+            <div className="text-sm md:text-base font-semibold text-slate-800">
+              Correct so far: {correctCount} / {total} ({percent}%)
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<ImageOcclusionFitbQuiz />);
+  </script>
 </body>
 </html>
